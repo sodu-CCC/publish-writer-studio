@@ -1,3 +1,7 @@
+<!-- set-repo-info:skip -->
+<!-- 本文件在讲解「占位符替换」，tools/set-repo-info.ps1 会自动跳过它，
+     避免把说明文字里的示例也一起改花。 -->
+
 # 只走 Edge + GitHub：完整操作步骤
 
 > 不花 $5 上 Chrome 商店的替代路线。两条腿：
@@ -23,33 +27,52 @@
 
 ## 第 0 步 · 替换占位符（必做）
 
-现在文档里有三种占位符，商店审核**不接受**它们：
+> 若你拿到的副本里还带着 `OWNER`、`&lt;你的用户名&gt;`、`&lt;你的邮箱&gt;` 这类占位符，
+> 商店审核**不接受**，必须先换成你自己的信息。
 
-| 占位符 | 出现在 |
-|---|---|
-| `sodu-CCC` | `README.md`（CI 徽章，两处） |
-| `sodu-CCC` | `docs/store/listing.*.md`、`privacy-policy.*.md`、本文件 |
-| `zhangxing0323@gmail.com` | `docs/store/listing.*.md` |
-
-在 `E:\CodexWork\publish-writer-studio` 目录下，把下面三个变量换成你的信息后执行：
+**不要手动一个个改**，用仓库里准备好的脚本：
 
 ```powershell
-$user = "你的GitHub用户名"
-$mail = "你的邮箱"
-$root = "E:\CodexWork\publish-writer-studio"
-Get-ChildItem $root -Recurse -File -Include *.md |
-  Where-Object { $_.FullName -notmatch '\\node_modules\\' } |
-  ForEach-Object {
-    $t = [System.IO.File]::ReadAllText($_.FullName, [System.Text.Encoding]::UTF8)
-    $t = $t.Replace('sodu-CCC', $user).Replace('sodu-CCC', $user).Replace('sodu-CCC', $user).Replace('zhangxing0323@gmail.com', $mail).Replace('zhangxing0323@gmail.com', $mail)
-    [System.IO.File]::WriteAllText($_.FullName, $t, (New-Object System.Text.UTF8Encoding($false)))
-  }
-Write-Host "占位符替换完成"
+cd /d E:\CodexWork\publish-writer-studio
+
+# 交互式：依次问你「用户名 / 仓库名 / 邮箱」
+powershell -ExecutionPolicy Bypass -File tools\set-repo-info.ps1
 ```
 
-> 顺便把仓库地址里的 `writer-studio` 换成你实际用的仓库名（若你换了名字）。
+也可以一次性给全参数：
 
----
+```powershell
+powershell -ExecutionPolicy Bypass -File tools\set-repo-info.ps1 -User 你的GitHub用户名 -Repo publish-writer-studio -Email 你的邮箱
+```
+
+或者直接**双击仓库根目录的 `设置仓库信息.bat`**（等价于上面第一条）。
+
+### 脚本做了什么
+
+| 环节 | 说明 |
+|---|---|
+| 扫描 | 全仓库 `.md`（跳过 `node_modules` / `.git` / `test-results`） |
+| 替换 | 占位符 → 你的用户名 / 仓库名 / 邮箱 |
+| **跳过** | 带 `set-repo-info:skip` 标记的教学文档（包括本文件），避免把说明文字也改花 |
+| 体检 | 结束时再扫一遍；若有残留会列出来并以退出码 1 结束 |
+| 幂等 | 已经配好的仓库再跑一遍，不做任何改动 |
+
+### 常用变体
+
+```powershell
+# 只预演，不落盘
+powershell -ExecutionPolicy Bypass -File tools\set-repo-info.ps1 -User x -Repo y -Email z -DryRun
+
+# 仓库改过名（如 writer-studio -> publish-writer-studio），把旧链接一起改掉
+powershell -ExecutionPolicy Bypass -File tools\set-repo-info.ps1 -User 你的用户名 -Repo 新仓库名 -Email 你的邮箱 -OldRepoName 旧仓库名
+```
+
+替换完提交：
+
+```bash
+git add -A
+git commit -m "docs: 替换占位符为实际仓库信息"
+```
 
 ## 第 1 步 · 推到 GitHub
 

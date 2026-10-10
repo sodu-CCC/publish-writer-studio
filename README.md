@@ -223,11 +223,12 @@ E2E 测试用真实浏览器打开工作台，**共 36 个用例**，并断言**
 ├─ popup/          工具栏弹窗
 ├─ icons/          图标（16 / 48 / 128）
 ├─ docs/           产品文档（中文 / English，含免责声明）
-├─ tools/check.mjs 项目自检脚本（本地与 CI 共用）
+├─ tools/check.mjs        项目自检脚本（本地与 CI 共用）
+├─ tools/set-repo-info.ps1 一次性把文档里的占位符替换成你的仓库信息
 ├─ tests/          Playwright E2E 测试
 ├─ .github/        CI / Release 工作流
 ├─ serve.py        本地服务器（仅网页版需要，含 AI 反向代理）
-└─ start-server.bat / backup.bat   Windows 便捷脚本
+└─ start-server.bat / backup.bat / 设置仓库信息.bat   Windows 便捷脚本
 ```
 ## 📄 许可
 
