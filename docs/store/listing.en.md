@@ -88,3 +88,4 @@ PRIVACY AND DESIGN BOUNDARIES
 ⚠️ Note: prompt text (and matched style snippets) are sent to the model provider you configure only when you click Generate. No click, no network request.
 
 An independently developed open-source project (MIT). Not affiliated with any third-party platform or model vendor.
+```
