@@ -67,10 +67,10 @@ cd /d E:\CodexWork\publish-writer-studio
 
 1. 仓库 → Settings → Pages
 2. Source 选 `Deploy from a branch`，Branch 选 `main` / `root`，保存
-3. 等 1 分钟，得到 `https://sodu-CCC.github.io/writer-studio/`
+3. 等 1 分钟，得到 `https://sodu-CCC.github.io/publish-writer-studio/`
 4. 隐私政策网址就是：
-   - 中文：`https://sodu-CCC.github.io/writer-studio/docs/store/privacy-policy.zh-CN.html`
-   - 英文：`https://sodu-CCC.github.io/writer-studio/docs/store/privacy-policy.en.html`
+   - 中文：`https://sodu-CCC.github.io/publish-writer-studio/docs/store/privacy-policy.zh-CN.html`
+   - 英文：`https://sodu-CCC.github.io/publish-writer-studio/docs/store/privacy-policy.en.html`
 
 > ⚠️ GitHub Pages 对 `.md` 会当纯文本处理，链接打开是源码。
 > 两个办法：① 把 `.md` 复制一份为 `.html` 加个简单页面壳；② 直接用方案 B 的 GitHub 渲染页。
@@ -80,7 +80,7 @@ cd /d E:\CodexWork\publish-writer-studio
 直接用仓库里的文件，打开就是渲染好的 Markdown：
 
 ```
-https://github.com/sodu-CCC/writer-studio/blob/main/docs/store/privacy-policy.zh-CN.md
+https://github.com/sodu-CCC/publish-writer-studio/blob/main/docs/store/privacy-policy.zh-CN.md
 ```
 
 > 商店审核**接受** GitHub 的文件页作为隐私政策网址（内容公开、可直接访问即可）。

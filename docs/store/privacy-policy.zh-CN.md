@@ -111,7 +111,7 @@
 
 有隐私相关问题，请在项目仓库提交 Issue：
 
-`https://github.com/sodu-CCC/writer-studio/issues`
+`https://github.com/sodu-CCC/publish-writer-studio/issues`
 
 ---
 

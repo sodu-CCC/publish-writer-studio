@@ -1,7 +1,7 @@
 # 码字工坊 · Writer Studio
 
 <!-- 上传前：把下面这行里的两处 sodu-CCC 换成你的 GitHub 用户名 -->
-[![CI](https://github.com/sodu-CCC/writer-studio/actions/workflows/ci.yml/badge.svg)](https://github.com/sodu-CCC/writer-studio/actions/workflows/ci.yml)
+[![CI](https://github.com/sodu-CCC/publish-writer-studio/actions/workflows/ci.yml/badge.svg)](https://github.com/sodu-CCC/publish-writer-studio/actions/workflows/ci.yml)
 
 **本地优先的 AI 网文写作工作台** —— 用你自己的作品做检索增强（RAG），让 AI 的输出贴近**你本人的文风**。
 

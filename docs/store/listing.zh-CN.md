@@ -12,9 +12,9 @@
 | 名称 | `码字工坊 Writer Studio` |
 | 类别 | 生产力工具（Productivity） |
 | 语言 | 中文（简体） |
-| 官网 / 主页 | `https://github.com/sodu-CCC/writer-studio` |
+| 官网 / 主页 | `https://github.com/sodu-CCC/publish-writer-studio` |
 | 支持邮箱 | `zhangxing0323@gmail.com` |
-| 隐私政策网址 | `https://github.com/sodu-CCC/writer-studio/blob/main/docs/store/privacy-policy.zh-CN.md`（或 GitHub Pages 地址，见上架清单） |
+| 隐私政策网址 | `https://github.com/sodu-CCC/publish-writer-studio/blob/main/docs/store/privacy-policy.zh-CN.md`（或 GitHub Pages 地址，见上架清单） |
 
 ---
 

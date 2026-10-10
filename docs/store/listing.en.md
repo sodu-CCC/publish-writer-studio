@@ -12,9 +12,9 @@
 | Name | `Writer Studio` |
 | Category | Productivity |
 | Language | English |
-| Homepage | `https://github.com/sodu-CCC/writer-studio` |
+| Homepage | `https://github.com/sodu-CCC/publish-writer-studio` |
 | Support email | `zhangxing0323@gmail.com` |
-| Privacy policy URL | `https://github.com/sodu-CCC/writer-studio/blob/main/docs/store/privacy-policy.en.md` (or a GitHub Pages URL — see the store checklist) |
+| Privacy policy URL | `https://github.com/sodu-CCC/publish-writer-studio/blob/main/docs/store/privacy-policy.en.md` (or a GitHub Pages URL — see the store checklist) |
 
 ---
 

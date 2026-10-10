@@ -111,7 +111,7 @@ This policy may be updated between versions. **The version in this repository is
 
 For privacy questions, please open an issue in the project repository:
 
-`https://github.com/sodu-CCC/writer-studio/issues`
+`https://github.com/sodu-CCC/publish-writer-studio/issues`
 
 ---
 
