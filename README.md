@@ -5,6 +5,10 @@
 
 **本地优先的 AI 网文写作工作台** —— 用你自己的作品做检索增强（RAG），让 AI 的输出贴近**你本人的文风**。
 
+📖 **产品文档**：[中文](docs/PRODUCT-GUIDE.zh-CN.md) ｜ [English](docs/PRODUCT-GUIDE.en.md)
+
+> 内含：功能详解 · 操作说明 · 数据存储与隐私 · 常见问题 · **免责声明**
+
 以 Chrome 扩展（Manifest V3）形式交付，也可以作为纯网页在本地运行。
 
 > **数据不出本机**：没有后端、没有账号、没有遥测。稿件和 API Key 只存在你的浏览器里。
@@ -216,6 +220,7 @@ E2E 测试用真实浏览器打开工作台，**共 36 个用例**，并断言**
 ├─ app/            扩展前端（UI / 数据层 / RAG / Agent / LLM 适配）
 ├─ popup/          工具栏弹窗
 ├─ icons/          图标（16 / 48 / 128）
+├─ docs/           产品文档（中文 / English，含免责声明）
 ├─ tools/check.mjs 项目自检脚本（本地与 CI 共用）
 ├─ tests/          Playwright E2E 测试
 ├─ .github/        CI / Release 工作流
