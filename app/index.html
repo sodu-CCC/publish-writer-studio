@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%233b5bdb'/%3E%3Cpath d='M9.6 23.7L22.4 9' stroke='%23fff' stroke-width='2.5' stroke-linecap='round'/%3E%3Cpath d='M8.2 25.1l4.6-.7' stroke='%23fff' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E" />
+<title>码字工坊 · Writer Studio</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div id="bootBar" class="bootbar">正在初始化…</div>
+
+<header class="topbar">
+  <button class="brand-box" id="brandHome" title="回到主界面">
+    <svg class="logo" viewBox="0 0 32 32" aria-hidden="true">
+      <rect x="1.2" y="1.2" width="29.6" height="29.6" rx="7" fill="currentColor"/>
+      <path d="M9.6 23.7L22.4 9" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M8.2 25.1l4.6-.7" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <span class="brand-text">码字工坊</span>
+  </button>
+  <button class="icon" id="navLibrary">书架</button>
+  <button class="icon" id="navWriter">写作台</button>
+  <button class="icon" id="navCorpus">语料库</button>
+  <span class="spacer"></span>
+  <span id="saveState" class="save-state">已就绪</span>
+  <button class="icon" id="navImport" title="导入文本（新建一本书）">导入</button>
+  <button class="icon" id="btnSettings" title="设置">设置</button>
+</header>
+
+<!-- ============ 前置页：书目目录 ============ -->
+<main id="viewLibrary" class="library">
+
+  <!-- 3. 最左侧条状缩略条（点击拉出统计） -->
+  <aside id="statBar" class="statbar">
+    <button id="statToggle" class="stat-toggle" title="写作统计">写作统计</button>
+    <div id="statPanel" class="stat-panel" hidden>
+      <h4 class="stat-h">总览</h4>
+      <div class="stat-grid">
+        <div class="stat-cell"><b id="statTotal">0</b><span>总字数</span></div>
+        <div class="stat-cell"><b id="statToday">0</b><span>今日</span></div>
+        <div class="stat-cell"><b id="statBooks">0</b><span>作品</span></div>
+        <div class="stat-cell"><b id="statChapters">0</b><span>章节</span></div>
+      </div>
+      <h4 class="stat-h">今日目标</h4>
+      <div class="goalbar"><i id="statGoalBar"></i></div>
+      <div class="stat-sub"><span id="statGoalText">0 / 3000</span></div>
+      <h4 class="stat-h">近 7 天</h4>
+      <div class="spark" id="spark"></div>
+      <div class="stat-sub" id="sparkMax">—</div>
+      <h4 class="stat-h">本周 · 节奏</h4>
+      <div class="stat-grid">
+        <div class="stat-cell"><b id="statWeek">0</b><span>本周字数</span></div>
+        <div class="stat-cell"><b id="statStreak">0</b><span>连续天数</span></div>
+        <div class="stat-cell"><b id="statAvg">0</b><span>平均章长</span></div>
+        <div class="stat-cell"><b id="statLongest">0</b><span>最长单日</span></div>
+      </div>
+      <h4 class="stat-h">作品字数排行</h4>
+      <div id="statRank" class="stat-rank"></div>
+    </div>
+  </aside>
+
+  <!-- 1&2. 目录矩形区域 -->
+  <section class="catalog-wrap">
+    <div class="catalog-head">
+      <span class="catalog-title">我的书架</span>
+      <span class="catalog-sub" id="catalogCount">0 本</span>
+      <span class="spacer"></span>
+      <input id="libSearch" class="lib-search" placeholder="检索书名 / 作者 / 梗概" />
+      <button class="mini" id="libSearchClear" hidden title="清空检索">✕</button>
+      <button class="mini" id="libNewBook">＋ 新建作品</button>
+    </div>
+
+    <div class="catalog" id="catalog"></div>
+
+    <!-- 5. 书目浮层：盖在目录上方，后方变暗 -->
+    <div class="overlay" id="bookOverlay" hidden>
+      <div class="overlay-mask" id="overlayMask"></div>
+      <div class="overlay-card" id="overlayCard"></div>
+    </div>
+  </section>
+
+  <!-- 4. 右侧可编辑预览区 -->
+  <aside class="preview" id="previewPane" hidden>
+    <div class="preview-head">
+      <select id="previewChapter" title="选择章节"></select>
+      <button class="mini" id="previewOpenWriter" title="进入完整写作台">写作台</button>
+    </div>
+    <div class="fmtbar">
+      <select data-fmt="font" title="字体">
+        <option value="song">宋体</option>
+        <option value="hei">黑体</option>
+        <option value="kai">楷体</option>
+        <option value="fang">仿宋</option>
+        <option value="system">系统默认</option>
+      </select>
+      <select data-fmt="size" title="字号">
+        <option>12</option><option>14</option><option selected>16</option><option>18</option>
+        <option>20</option><option>22</option><option>24</option><option>26</option><option>28</option>
+      </select>
+      <select data-fmt="line" title="行距">
+        <option value="1.4">1.4</option><option value="1.6">1.6</option>
+        <option value="1.8" selected>1.8</option><option value="2">2.0</option><option value="2.4">2.4</option>
+      </select>
+      <label class="fmt-check"><input type="checkbox" data-fmt="indent" /> 段首缩进</label>
+      <input type="number" class="indent-num" data-fmt="indentChars" min="0" max="8" step="1" title="缩进几个字符" />
+      <button class="mini" type="button" data-fmt-act="normalize" title="按当前设置整理全文缩进">整理</button>
+      <span class="spacer"></span>
+      <button class="mini" type="button" data-head="1" title="插入章标题标记">章标题</button>
+      <button class="mini" type="button" data-head="2" title="插入小标题标记">小标题</button>
+      <button class="mini" type="button" data-head="0" title="转回正文">正文</button>
+    </div>
+<input id="previewTitle" class="preview-title" placeholder="章节标题" readonly title="双击可修改章节标题" />
+    <textarea id="previewContent" class="preview-content" placeholder="直接在这里修改内容……" spellcheck="false"></textarea>
+    <div class="preview-foot">
+      <span id="previewWords">0 字</span>
+      <span class="spacer"></span>
+      <span id="previewState" class="preview-state">已就绪</span>
+      <button class="mini" id="previewSave">保存</button>
+    </div>
+  </aside>
+</main>
+
+<!-- ============ 语料库 / 风格画像 ============ -->
+<main id="viewCorpus" class="corpus-view" hidden>
+  <section class="corpus">
+    <div class="corpus-head">
+      <span class="catalog-title">语料库 · 风格画像</span>
+      <span class="catalog-sub" id="corpusStat">0 篇 · 0 字 · 0 片段</span>
+      <span class="spacer"></span>
+      <button class="mini" id="colCurrentBook">采集本书</button>
+      <button class="mini" id="colAllBooks">采集全部作品</button>
+      <button class="mini" id="colPaste">粘贴文本</button>
+      <button class="mini" id="colTxt">导入 txt</button>
+      <button class="mini" id="ragSelfTest">自检</button>
+      <button class="mini danger" id="colClear">清空语料</button>
+    </div>
+    <div class="corpus-body">
+      <div class="corpus-col style-col">
+        <div class="panel-h">风格画像</div>
+        <div id="styleBox" class="style-box">还没有语料。先点上方「采集本书」或「采集全部作品」。</div>
+        <label class="checkline"><input type="checkbox" id="ragEnabled" checked /> 生成时注入风格与范例</label>
+        <p class="hint">检索在本地完成（BM25），不上传任何语料；只有点「生成」时才会把命中片段随提示词发给你自己配置的模型。</p>
+      </div>
+      <div class="corpus-col list-col">
+        <div class="panel-h">检索测试</div>
+        <div class="row">
+          <input id="ragQuery" placeholder="输入一段文字，看看会命中哪些过往片段" />
+          <button class="mini" id="ragSearch">检索</button>
+        </div>
+        <div id="ragHits" class="rag-hits"></div>
+        <div class="panel-h" style="margin-top:14px">语料列表</div>
+        <ul id="corpusList" class="list"></ul>
+      </div>
+
+      <aside class="corpus-detail" id="corpusDetail">
+        <div class="panel-h">语料详情</div>
+        <input id="corpusDocTitle" class="corpus-title-input" placeholder="语料标题" />
+        <textarea id="corpusDocText" class="corpus-text" placeholder="点左侧语料列表里的条目来查看和修改，或点「新建」。" spellcheck="false"></textarea>
+        <div class="row">
+          <button class="mini primary" id="corpusDocSave">保存</button>
+          <button class="mini" id="corpusDocNew">新建</button>
+          <button class="mini danger" id="corpusDocDelete">删除</button>
+          <span class="spacer"></span>
+          <span id="corpusDocState" class="hint"></span>
+        </div>
+      </aside>
+    </div>
+  </section>
+</main>
+<!-- ============ 写作台（原三栏） ============ -->
+<main id="viewWriter" class="layout" hidden>
+  <aside class="sidebar">
+    <div class="side-head">
+      <span>作品</span>
+      <span class="side-actions">
+        <button class="mini" id="newBook" title="新建作品">＋</button>
+        <button class="mini" id="renameBook" title="重命名">改名</button>
+        <button class="mini danger" id="deleteBook" title="删除作品">删</button>
+      </span>
+    </div>
+    <div class="side-head">
+      <span>章节</span>
+      <span class="side-actions">
+        <button class="mini" id="importTxt" title="把 txt 追加到当前章节（不新建书）">追加</button>
+        <button class="mini" id="newChapter" title="新建章节">＋</button>
+      </span>
+    </div>
+    <select id="bookSelect" title="切换作品" style="margin:6px 8px;width:calc(100% - 16px)"></select>
+    <ul id="chapterList" class="list"></ul>
+
+    <div class="side-head">
+      <span>设定</span>
+      <button class="mini" id="newCard" title="新建卡片">＋</button>
+    </div>
+    <div class="tabs" id="cardTabs">
+      <button class="tab active" data-card="outline">大纲</button>
+      <button class="tab" data-card="role">角色</button>
+      <button class="tab" data-card="setting">设定</button>
+      <button class="tab" data-card="foreshadow">伏笔</button>
+    </div>
+    <ul id="cardList" class="list"></ul>
+  </aside>
+
+  <section class="editor">
+    <div class="findbar" id="findBar" hidden>
+      <input id="findText" class="find-input" placeholder="查找" />
+      <input id="replaceText" class="find-input" placeholder="替换为" />
+      <select id="findScope" title="范围">
+        <option value="chapter">本章</option>
+        <option value="book">全书</option>
+      </select>
+      <label class="fmt-check"><input type="checkbox" id="findCase" /> 区分大小写</label>
+      <span id="findCount" class="find-count"></span>
+      <span class="spacer"></span>
+      <button class="mini" type="button" id="findPrev" title="上一个（Shift+Enter）">上一个</button>
+      <button class="mini" type="button" id="findNext" title="下一个（Enter）">下一个</button>
+      <button class="mini" type="button" id="findReplace">替换</button>
+      <button class="mini primary" type="button" id="findReplaceAll">全部替换</button>
+      <button class="mini" type="button" id="findClose" title="关闭（Esc）">✕</button>
+    </div>
+    <div class="fmtbar">
+      <select data-fmt="font" title="字体">
+        <option value="song">宋体</option><option value="hei">黑体</option><option value="kai">楷体</option>
+        <option value="fang">仿宋</option><option value="system">系统默认</option>
+      </select>
+      <select data-fmt="size" title="字号">
+        <option>12</option><option>14</option><option selected>16</option><option>18</option>
+        <option>20</option><option>22</option><option>24</option><option>26</option><option>28</option>
+      </select>
+      <select data-fmt="line" title="行距">
+        <option value="1.4">1.4</option><option value="1.6">1.6</option>
+        <option value="1.8" selected>1.8</option><option value="2">2.0</option><option value="2.4">2.4</option>
+      </select>
+      <label class="fmt-check"><input type="checkbox" data-fmt="indent" /> 段首缩进</label>
+      <input type="number" class="indent-num" data-fmt="indentChars" min="0" max="8" step="1" title="缩进几个字符" />
+      <button class="mini" type="button" data-fmt-act="normalize" title="按当前设置整理全文缩进">整理</button>
+      <span class="spacer"></span>
+      <button class="mini" type="button" data-head="1">章标题</button>
+      <button class="mini" type="button" data-head="2">小标题</button>
+      <button class="mini" type="button" data-head="0">正文</button>
+      <button class="mini" type="button" id="navFind" title="查找替换（Ctrl+F）">查找</button>
+    </div>
+    <input id="chapterTitle" class="chapter-title" placeholder="章节标题" />
+    <div class="editor-wrap">
+      <textarea id="content" class="content" placeholder="在这里开始写作……" spellcheck="false"></textarea>
+      <div id="contentMarks" class="content-marks" aria-hidden="true"></div>
+    </div>
+    <footer class="statusbar">
+      <span id="wordCount">0 字</span>
+      <span id="todayWords">今日 0 字</span>
+      <span id="goalText">目标 0 / 3000</span>
+      <span class="spacer"></span>
+      <button class="mini" id="snapshot">存快照</button>
+      <button class="mini" id="history">历史</button>
+      <button class="mini" id="exportBook">导出</button>
+    </footer>
+  </section>
+
+  <aside class="ai">
+    <div class="ai-head">
+      <span>AI 辅助</span>
+      <span id="aiStatus" class="ai-status">未配置</span>
+    </div>
+    <div class="notice">
+      AI 仅供参考，需人工改写与把关；若用于发布，请按平台规则<b>主动声明</b>。本工具不会自动发布或回写第三方网站。
+    </div>
+    <div id="aiRagInfo" class="hint"></div>
+    <div class="row"><button class="primary" id="openAgent" style="width:100%">Agent 模式 · 自主写这一章</button></div>
+    <div class="row"><button class="mini" id="openOutlineAgent" style="width:100%">Agent 大纲梳理 · 按已写内容整理并拓展</button></div>
+    <div class="actions" id="aiActions"></div>
+    <label class="field">
+      <span>自定义要求（可选）</span>
+      <textarea id="aiPrompt" rows="2" placeholder="例：这一章要突出主角的犹豫，不要出现战斗"></textarea>
+    </label>
+    <div class="row">
+      <label class="field inline"><span>字数</span><input id="aiWords" type="number" value="300" min="50" step="50" /></label>
+      <button class="primary" id="aiRun">生成</button>
+    </div>
+    <div id="aiOut" class="ai-out"></div>
+    <div class="row" id="aiOutActions" hidden>
+      <button class="mini" id="aiAppend">插入到光标</button>
+      <button class="mini" id="aiReplace">替换选中</button>
+      <button class="mini" id="aiCopy">复制</button>
+      <button class="mini" id="aiLog">使用日志</button>
+    </div>
+  </aside>
+</main>
+
+<!-- ============ 作品信息编辑 ============ -->
+<dialog id="bookDialog">
+  <form method="dialog" class="dialog">
+    <h3>作品信息</h3>
+    <div class="book-edit">
+      <div class="cover-col">
+        <div id="bookCoverPreview" class="cover cover-lg"></div>
+        <label class="mini cover-upload">选择封面<input id="bookCoverFile" type="file" accept="image/*" hidden /></label>
+        <button class="mini" type="button" id="bookCoverRemove">移除封面</button>
+      </div>
+      <div class="meta-col">
+        <label class="field"><span>书名</span><input id="bookTitle" /></label>
+        <label class="field"><span>作者</span><input id="bookAuthor" /></label>
+        <label class="field"><span>梗概</span><textarea id="bookSummary" rows="6" placeholder="一句话到几百字都行，列表里超出会显示省略号"></textarea></label>
+      </div>
+    </div>
+    <div class="row end">
+      <button class="mini danger" type="button" id="bookDelete">删除作品</button>
+      <span class="spacer"></span>
+      <button class="primary" id="bookSave" value="save">保存</button>
+      <button class="mini" value="close">关闭</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- ============ 原有对话框 ============ -->
+<dialog id="settingsDialog">
+  <form method="dialog" class="dialog">
+    <h3>设置</h3>
+    <label class="field"><span>服务预设</span><select id="preset"></select></label>
+    <label class="field"><span>Base URL</span><input id="baseUrl" placeholder="https://api.deepseek.com/v1" /></label>
+    <label class="field"><span>API Key</span><input id="apiKey" type="password" placeholder="sk-..." autocomplete="off" /></label>
+    <label class="field"><span>模型</span><input id="model" placeholder="deepseek-chat" /></label>
+    <div class="row">
+      <label class="field inline"><span>温度</span><input id="temperature" type="number" step="0.05" min="0" max="2" /></label>
+      <label class="field inline"><span>上下文长度</span><input id="contextChars" type="number" min="200" step="100" /></label>
+      <label class="field inline"><span>每日目标</span><input id="dailyGoal" type="number" min="0" step="100" /></label>
+      <label class="field inline"><span>字号</span><input id="fontSize" type="number" min="12" max="28" /></label>
+    <div class="field"><span>主题（护眼预设 / 自定义主色）</span>
+      <div class="theme-row" id="themeRow">
+        <button type="button" class="theme-dot" data-theme="default" title="默认浅色"></button>
+        <button type="button" class="theme-dot" data-theme="green" title="护眼绿"></button>
+        <button type="button" class="theme-dot" data-theme="blue" title="护眼蓝"></button>
+        <button type="button" class="theme-dot" data-theme="dark" title="暗色"></button>
+        <label class="theme-pick">自定义主色<input type="color" id="themeCustom" value="#3b5bdb" /></label>
+      </div>
+      <label class="fmt-check" style="margin-top:8px"><input type="checkbox" id="hideScrollbars" /> 隐藏滚动条（仍可滚动，会显示边缘阴影提示）</label>
+    </div>
+    </div>
+    <p class="hint">密钥只保存在本机浏览器，不会上传到任何服务器。</p>
+    <div class="row end">
+      <button class="mini" type="button" id="exportAll">导出全部数据</button>
+      <button class="mini" type="button" id="importAllBtn">导入备份</button>
+      <input id="importAllFile" type="file" accept="application/json" hidden />
+      <span class="spacer"></span>
+      <button class="mini" type="button" id="testConn">测试连接</button>
+      <button class="primary" id="saveSettings" value="save">保存</button>
+      <button class="mini" value="close">关闭</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="historyDialog">
+  <div class="dialog">
+    <h3>历史快照</h3>
+    <ul id="historyList" class="list"></ul>
+    <div class="row end"><span class="spacer"></span><button class="mini" id="closeHistory">关闭</button></div>
+  </div>
+</dialog>
+
+<dialog id="cardDialog">
+  <form method="dialog" class="dialog">
+    <h3 id="cardDialogTitle">编辑卡片</h3>
+    <label class="field" id="cardAnchorField" hidden>
+      <span>伏笔文段 · 正文里那一整段（虚线只画在这里填的文段下面）<br />要标多个片段请<b>换行或分号</b>分隔；<b>逗号算片段内部标点，不当分隔符</b>。</span>
+      <textarea id="cardAnchor" rows="3" placeholder="先在正文里选中那一句/那一段，再点下面的「取当前选中」"></textarea>
+      <div class="row">
+        <button class="mini" type="button" id="anchorFromSel" title="把正文里选中的那段取到这里">取当前选中</button>
+        <button class="mini" type="button" id="anchorOffBtn" title="取消正文里这段文字的伏笔标注（框里的文字保留）">取消当前选中</button>
+        <button class="mini" type="button" id="anchorClear">清空</button>
+        <span id="anchorMatch" class="hint"></span>
+      </div>
+      <label class="fmt-check" style="margin-top:6px">
+        <input type="checkbox" id="anchorEnabled" checked />
+        启用这段标注（取消勾选＝这段暂时失效：正文不画虚线、点它也不弹伏笔，但上面的文字保留）
+      </label>
+    </label>
+    <label class="field"><span id="cardTitleLabel">标题</span><input id="cardTitle" /></label>
+    <label class="field"><span id="cardBodyLabel">内容</span><textarea id="cardBody" rows="10"></textarea></label>
+    <div class="row end">
+      <button class="mini danger" id="cardDelete" type="button">删除</button>
+      <span class="spacer"></span>
+      <button class="primary" id="cardSave" value="save">保存</button>
+      <button class="mini" value="close">关闭</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="agentParamsDialog">
+  <div class="dialog">
+    <h3>Agent 参数</h3>
+    <label class="field"><span>目标字数</span><input id="agentWords" type="number" value="1500" step="100" min="200" /></label>
+    <label class="field"><span>最大步数（含取资料/分段/自检/修订）</span><input id="agentSteps" type="number" value="12" min="4" max="30" /></label>
+    <label class="field"><span>自检重写轮数</span><input id="agentRevise" type="number" value="1" min="0" max="3" /></label>
+    <p class="hint">步数越多越细，但更慢、更费 token。建议 8–16。</p>
+    <div class="row end"><span class="spacer"></span><button class="primary" id="agentParamsOk">确定</button></div>
+  </div>
+</dialog>
+<dialog id="agentDialog">
+  <div class="dialog agent-dialog">
+    <h3>Agent · 自主写作（草稿模式）</h3>
+    <p class="hint">Agent 会自己决定查哪些资料 → 分段写 → 写完自检 → 按问题修订。<b>只产出草稿</b>，必须你点「采纳」才会写进正文。</p>
+    <label class="field"><span>目标</span><input id="agentGoal" value="帮我把这一章写完" /></label>
+    <div class="row agent-actions">
+      <button class="primary" id="agentRun">开始</button>
+      <button class="mini" id="agentStop" disabled>停止</button>
+      <button class="mini" id="agentParamsBtn" title="字数 / 步数 / 自检轮数">参数设置</button>
+      <span class="spacer"></span>
+      <span id="agentState" class="hint agent-state"></span>
+    </div>
+    <div class="agent-grid">
+      <div class="agent-col">
+        <div class="panel-h panel-h-row"><span>执行过程</span><span class="spacer"></span><button class="mini" id="agentLogCopy" title="复制完整执行过程">复制</button></div>
+        <div id="agentLog" class="agent-log"></div>
+      </div>
+      <div class="agent-col">
+        <div class="panel-h">草稿（未写入正文，可编辑）</div>
+        <textarea id="agentDraft" class="agent-draft" placeholder="跑完会出现在这里…" spellcheck="false"></textarea>
+        <div class="row">
+          <button class="mini" id="agentAdoptAppend">追加到本章</button>
+          <button class="mini" id="agentAdoptReplace">替换本章</button>
+          <button class="mini" id="agentCopy">复制</button>
+          <button class="mini" id="agentApplyCritic" title="按本次审稿意见重写草稿">应用审稿意见</button>
+        </div>
+      </div>
+    </div>
+    <div class="row end"><span class="spacer"></span><button class="mini" id="agentClose">关闭</button></div>
+  </div>
+</dialog>
+<dialog id="outlineDialog">
+  <div class="dialog outline-dialog">
+    <h3>Agent · 大纲梳理</h3>
+    <p class="hint">读取已写正文 → 归纳现有剧情 → 对比已有大纲 → 诊断问题 → 给出拓展方向与建议大纲。<b>只读取，不修改正文。</b></p>
+    <div class="row">
+      <label class="field inline"><span>梳理范围</span>
+        <select id="outlineScope">
+          <option value="incremental">仅新增章节（从上次之后）</option>
+          <option value="all">全部章节</option>
+          <option value="recent">最近 N 章</option>
+        </select>
+      </label>
+      <label class="field inline"><span>N</span><input id="outlineRecent" type="number" value="10" min="1" max="500" /></label>
+      <button class="mini" type="button" id="outlineResetCursor" title="清空增量进度，下次从头开始">重置进度</button>
+      <span class="spacer"></span>
+      <span id="outlineCursor" class="hint"></span>
+    </div>
+    <div class="row">
+      <button class="primary" id="outlineRun">开始梳理</button>
+      <button class="mini" id="outlineStop" disabled>停止</button>
+      <span class="spacer"></span>
+      <span id="outlineState" class="hint"></span>
+    </div>
+    <div class="outline-grid">
+      <div class="outline-col">
+        <div class="panel-h">执行过程</div>
+        <div id="outlineLog" class="agent-log"></div>
+      </div>
+      <div class="outline-col">
+        <div class="panel-h">梳理结果</div>
+        <div id="outlineResult" class="outline-result"><div class="hint">点「开始梳理」后，结果会显示在这里。</div></div>
+      </div>
+    </div>
+    <div class="row end">
+      <button class="mini" id="outlineSaveCards" disabled>把建议大纲写入大纲卡片</button>
+      <button class="mini" id="outlineCopy">复制结果</button>
+      <span class="spacer"></span>
+      <button class="mini" id="outlineClose">关闭</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="importDialog">
+  <div class="dialog import-dialog">
+    <h3>导入文本 · 新建一本书</h3>
+    <p class="hint">支持 .txt / .md，也可以直接粘贴。导入会新建一本书，正文里的「第X章」自动拆成章节。只写入本机，不会上传。</p>
+    <div class="row">
+      <button class="mini" id="importPickFile">选择文件…</button>
+      <span id="importFileName" class="hint"></span>
+      <span class="spacer"></span>
+      <button class="mini" id="importClear">清空</button>
+    </div>
+    <label class="field"><span>书名</span><input id="importBookTitle" placeholder="不填就用文件名，再没有就叫「导入的作品」" /></label>
+    <label class="field"><span>内容</span><textarea id="importText" rows="10" placeholder="把文本粘贴到这里，或点上面的「选择文件…」"></textarea></label>
+    <div class="row end">
+      <span id="importState" class="hint"></span>
+      <span class="spacer"></span>
+      <button class="primary" id="importRun">导入为新书</button>
+      <button class="mini" id="importClose">关闭</button>
+    </div>
+  </div>
+</dialog>
+<dialog id="logDialog">
+  <div class="dialog">
+    <h3>AI 使用日志</h3>
+    <p class="hint">按平台要求声明时，可参考这份记录。</p>
+    <ul id="logList" class="list"></ul>
+    <div class="row end"><span class="spacer"></span><button class="mini" id="closeLog">关闭</button></div>
+  </div>
+</dialog>
+
+<div id="hoverTip" class="hovertip" hidden></div>
+<script type="module" src="app.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

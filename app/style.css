@@ -1,0 +1,716 @@
+:root{
+  --bg:#f6f7f9; --panel:#ffffff; --ink:#1f2328; --ink-2:#5b6570; --ink-3:#8b949e;
+  --line:#e3e6ea; --accent:#3b5bdb; --accent-2:#eef1fd; --danger:#c0392b;
+  --radius:8px; --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#16181d; --panel:#1e2127; --ink:#e6e8eb; --ink-2:#a5adb8; --ink-3:#6e7681;
+         --line:#2c3038; --accent:#7a90ff; --accent-2:#232a44; --danger:#e0685b; }
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{
+  background:var(--bg); color:var(--ink);
+  font:14px/1.6 -apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  display:flex; flex-direction:column;
+}
+button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--ink);
+  border-radius:6px;padding:4px 10px}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.mini{padding:2px 8px;font-size:12px}
+button.icon{padding:4px 8px;font-size:12px}
+button.danger{color:var(--danger)}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--panel);
+  border:1px solid var(--line);border-radius:6px;padding:5px 8px;outline:none;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+.spacer{flex:1}
+.row{display:flex;gap:8px;align-items:center;margin:8px 0;flex-wrap:wrap}
+.row.end{justify-content:flex-end}
+.hint{color:var(--ink-3);font-size:12px;margin:6px 0}
+
+/* top bar */
+.topbar{display:flex;gap:8px;align-items:center;padding:8px 12px;background:var(--panel);
+  border-bottom:1px solid var(--line)}
+.brand{font-weight:600;letter-spacing:.5px}
+.topbar select{width:auto;min-width:160px}
+.save-state{font-size:12px;color:var(--ink-3);margin-right:4px}
+
+/* 当前所在页面（方案二）：圆角矩形框整体消失，只留文字，并把字整体微微突出。
+   用 transparent 而不是 border:none —— 盒子尺寸保持不变，
+   旁边按钮不会因为切换页面而左右跳动。
+   突出用 transform:scale（不参与布局计算），同理不会挤动邻居。 */
+.topbar button.nav-on{
+  border-color:transparent;        /* 圆角矩形框消失 */
+  background:transparent;
+  color:var(--accent);             /* 文字换成主题色 */
+  transform:scale(1.08);           /* 整体微调突出 */
+}
+.topbar button.nav-on:hover{
+  border-color:transparent;
+  background:transparent;
+}
+
+/* 卡片弹窗（非模态）：泊在右上角，别压住中间的正文，方便一边选字一边取用。
+   拖标题栏可以挪位置（拖动逻辑会把 inset 换成显式 left/top）。 */
+dialog#cardDialog.modeless[open]{
+  position:fixed;
+  top:52px; right:20px; left:auto; bottom:auto;
+  margin:0;
+  width:min(460px,62vw);
+  max-height:84vh;
+  overflow:auto;
+  z-index:9998;
+  box-shadow:0 12px 32px rgba(0,0,0,.16);
+}
+@media (max-width:900px){
+  dialog#cardDialog.modeless[open]{ width:auto; left:12px; right:12px; }
+}
+
+/* layout */
+.layout{flex:1;display:grid;grid-template-columns:230px minmax(0,1fr) 330px;gap:1px;
+  background:var(--line);overflow:hidden}
+.layout > *{background:var(--panel);overflow:auto}
+@media (max-width:1080px){ .layout{grid-template-columns:200px minmax(0,1fr)} .ai{display:none} }
+
+/* sidebar */
+.side-head{display:flex;justify-content:space-between;align-items:center;
+  padding:8px 10px;font-size:12px;color:var(--ink-2);border-bottom:1px solid var(--line);
+  position:sticky;top:0;background:var(--panel);z-index:1}
+.side-actions{display:flex;gap:4px}
+.list{list-style:none;margin:0;padding:4px}
+.list li{display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:6px;cursor:pointer;font-size:13px}
+.list li:hover{background:var(--accent-2)}
+.list li.active{background:var(--accent-2);color:var(--accent);font-weight:600}
+.list li .t{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.list li .x{opacity:0;font-size:11px;color:var(--ink-3);border:none;background:none;padding:0 2px}
+.list li:hover .x{opacity:1}
+.tabs{display:flex;gap:4px;padding:6px 8px;border-bottom:1px solid var(--line)}
+.tab{border:none;background:none;padding:2px 8px;font-size:12px;color:var(--ink-2);border-radius:6px}
+.tab.active{background:var(--accent-2);color:var(--accent)}
+
+/* editor */
+.editor{display:flex;flex-direction:column;min-width:0}
+.chapter-title{border:none;border-bottom:1px solid var(--line);border-radius:0;font-size:16px;
+  font-weight:600;padding:10px 16px}
+.content{flex:1;border:none;border-radius:0;resize:none;padding:16px 20px;line-height:2;
+  font-size:16px;font-family:"Songti SC",SimSun,Georgia,serif;background:transparent}
+.statusbar{display:flex;gap:14px;align-items:center;padding:6px 12px;border-top:1px solid var(--line);
+  font-size:12px;color:var(--ink-3)}
+
+/* ai */
+.ai{display:flex;flex-direction:column;padding:10px}
+.ai-head{display:flex;justify-content:space-between;align-items:center;font-weight:600;margin-bottom:6px}
+.ai-status{font-size:12px;color:var(--ink-3);font-weight:400}
+.notice{background:var(--accent-2);color:var(--ink-2);font-size:12px;padding:8px;border-radius:6px;margin-bottom:10px}
+.actions{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.actions button{font-size:12px;padding:3px 10px;border-radius:999px}
+.actions button.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.field{display:block;margin:6px 0;font-size:12px;color:var(--ink-2)}
+.field > span{display:block;margin-bottom:3px}
+.field.inline{display:flex;flex-direction:column;flex:1 1 110px;margin:0;min-width:0}
+.ai-out{border:1px dashed var(--line);border-radius:6px;padding:10px;min-height:90px;
+  white-space:pre-wrap;font-size:13px;color:var(--ink-2);overflow:auto;flex:1}
+
+/* dialogs */
+dialog{border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);color:var(--ink);
+  padding:0;width:min(680px,92vw);max-width:96vw}
+dialog::backdrop{background:rgba(0,0,0,.4)}
+.dialog{padding:16px;margin:0}
+.dialog h3{margin:0 0 10px}
+.dialog textarea{resize:vertical}
+
+/* 启动状态条 */
+.bootbar{padding:6px 14px;background:var(--accent-2);color:var(--ink-2);font-size:12px;
+  border-bottom:1px solid var(--line)}
+.bootbar.err{background:#fdecea;color:#c0392b;font-weight:600}
+@media (prefers-color-scheme: dark){ .bootbar.err{background:#3a1f1c;color:#e0685b} }
+
+/* ================= 书库（前置页） ================= */
+[hidden]{display:none !important}
+
+.library{flex:1;display:flex;background:var(--line);gap:1px;overflow:hidden;min-height:0}
+.library > *{background:var(--panel)}
+
+/* 3. 左侧条状缩略条：点击拉出 */
+.statbar{width:44px;flex:0 0 auto;display:flex;overflow:hidden;transition:width .22s ease}
+.statbar.open{width:250px}
+.stat-toggle{width:44px;flex:0 0 44px;border:none;background:transparent;color:var(--ink-2);
+  writing-mode:vertical-rl;letter-spacing:6px;font-size:12px;padding:14px 0;cursor:pointer;border-radius:0}
+.stat-toggle:hover{color:var(--accent);background:var(--accent-2)}
+.stat-panel{width:206px;padding:10px 12px;overflow:auto}
+.stat-h{margin:10px 0 6px;font-size:12px;color:var(--ink-3);font-weight:600;letter-spacing:.5px}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stat-cell{background:var(--accent-2);border-radius:6px;padding:8px}
+.stat-cell b{display:block;font-size:17px;line-height:1.25}
+.stat-cell span{font-size:11px;color:var(--ink-2)}
+.goalbar{height:8px;border-radius:99px;overflow:hidden;background:var(--line)}
+.goalbar i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+.stat-sub{font-size:11px;color:var(--ink-3);margin-top:4px}
+.spark{display:flex;align-items:flex-end;gap:3px;height:54px}
+.spark i{flex:1;background:var(--accent);opacity:.7;border-radius:2px 2px 0 0;min-height:3px}
+.spark i.today{opacity:1}
+
+/* 1&2. 目录矩形区域 */
+.catalog-wrap{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;position:relative}
+.catalog-head{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line)}
+.catalog-title{font-weight:600}
+.catalog-sub{font-size:12px;color:var(--ink-3)}
+.lib-search{width:min(220px,36vw);font-size:12px;padding:4px 8px}
+.catalog{margin:12px;border:1px solid var(--line);border-radius:8px;overflow:auto;flex:1;min-height:0}
+
+.book-row{display:flex;gap:12px;padding:12px;border-bottom:1px solid var(--line);cursor:pointer;align-items:flex-start}
+.book-row:last-child{border-bottom:none}
+.book-row:hover{background:var(--accent-2)}
+.book-row.active{background:var(--accent-2)}
+.cover{width:64px;height:88px;border-radius:6px;flex:0 0 64px;overflow:hidden;display:flex;
+  align-items:center;justify-content:center;color:#fff;font-size:22px;font-weight:600;background:#3b5bdb;
+  user-select:none}
+.cover img{width:100%;height:100%;object-fit:cover;display:block}
+.cover-lg{width:120px;height:164px;font-size:40px;flex:0 0 120px}
+.book-main{min-width:0;flex:1;display:flex;flex-direction:column;gap:5px}
+.book-name{font-weight:600;font-size:15px;line-height:1.3;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.book-author{font-size:12px;color:var(--ink-3)}
+/* 2. 梗概两行截断 + 省略号 */
+.book-summary{font-size:12.5px;color:var(--ink-2);line-height:1.65;overflow:hidden;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.book-meta{margin-top:auto;font-size:11px;color:var(--ink-3);display:flex;gap:12px;flex-wrap:wrap}
+.catalog-empty{padding:40px;text-align:center;color:var(--ink-3);font-size:13px}
+
+/* 5. 书目浮层 */
+.overlay{position:absolute;inset:0;display:flex;align-items:flex-start;justify-content:center;padding:22px;z-index:5}
+.overlay-mask{position:absolute;inset:0;background:rgba(20,22,26,.42)}
+.overlay-card{position:relative;width:min(660px,94%);max-height:calc(100% - 44px);overflow:auto;
+  background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px}
+.ov-head{display:flex;gap:14px}
+.ov-title{font-size:17px;font-weight:600}
+.ov-author{font-size:12px;color:var(--ink-3);margin-top:3px}
+.ov-meta{font-size:11.5px;color:var(--ink-3);margin-top:6px;display:flex;gap:12px;flex-wrap:wrap}
+.ov-summary{font-size:13px;color:var(--ink-2);margin-top:8px;line-height:1.7;overflow:hidden;
+  display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical}
+.ov-actions{display:flex;gap:8px;margin-top:12px}
+.ov-sep{height:1px;background:var(--line);margin:14px 0 10px}
+.ov-sub{font-size:12px;color:var(--ink-3);margin-bottom:6px;display:flex;align-items:center}
+.chapter-item{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:6px;cursor:pointer;font-size:13px}
+.chapter-item:hover{background:var(--accent-2)}
+.chapter-item.active{background:var(--accent-2);color:var(--accent);font-weight:600}
+.chapter-item .t{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chapter-item .w{font-size:11px;color:var(--ink-3)}
+
+/* 4. 右侧可编辑预览 */
+.preview{width:400px;flex:0 0 400px;display:flex;flex-direction:column;min-width:0}
+.preview-head{display:flex;gap:8px;padding:8px;border-bottom:1px solid var(--line)}
+.preview-head select{flex:1;min-width:0}
+.preview-title{border:none;border-bottom:1px solid var(--line);border-radius:0;font-weight:600;padding:9px 12px}
+.preview-content{flex:1;border:none;border-radius:0;resize:none;padding:12px 14px;line-height:1.95;font-size:15px;
+  font-family:"Songti SC",SimSun,Georgia,serif;background:transparent;min-height:0}
+.preview-foot{display:flex;align-items:center;gap:10px;padding:6px 12px;border-top:1px solid var(--line);
+  font-size:12px;color:var(--ink-3)}
+.preview-state{color:var(--ink-3)}
+
+/* 作品信息编辑 */
+.book-edit{display:flex;gap:16px}
+.cover-col{display:flex;flex-direction:column;gap:6px;align-items:center;flex:0 0 120px}
+.cover-upload{text-align:center;cursor:pointer}
+.meta-col{flex:1;min-width:0}
+
+@media (max-width:1180px){
+  .preview{width:340px;flex-basis:340px}
+}
+@media (max-width:960px){
+  .preview{display:none}
+}
+
+/* ================= 语料库 / 风格画像 ================= */
+.corpus{flex:1;display:flex;flex-direction:column;min-width:0;background:var(--panel)}
+.corpus-head{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.corpus-body{flex:1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1px;background:var(--line);overflow:hidden}
+.corpus-col{background:var(--panel);padding:14px;overflow:auto;min-width:0}
+.panel-h{font-size:12px;color:var(--ink-3);font-weight:600;margin-bottom:8px;letter-spacing:.5px}
+.style-box{white-space:pre-wrap;font-size:12.5px;line-height:1.85;color:var(--ink-2);
+  background:var(--accent-2);border-radius:8px;padding:12px;max-height:360px;overflow:auto}
+.checkline{display:flex;align-items:center;gap:8px;font-size:12.5px;margin:12px 0 4px;color:var(--ink-2)}
+.checkline input{width:auto}
+.rag-hits{display:flex;flex-direction:column;gap:8px;margin-top:10px;max-height:320px;overflow:auto}
+.rag-hit{border:1px solid var(--line);border-radius:8px;padding:10px;font-size:12.5px;line-height:1.7;color:var(--ink-2)}
+.rag-hit .sc{color:var(--ink-3);font-size:11px;display:block;margin-bottom:4px}
+@media (max-width:900px){ .corpus-body{grid-template-columns:1fr} }
+
+/* ==================================================================
+   本次新增：主题 / logo / 格式栏 / 2-3 预览 / 统计补充
+   ================================================================== */
+
+/* ---- 2) 主题预设（护眼绿 / 护眼蓝 / 暗色 / 默认）---- */
+html[data-theme="default"]{
+  --bg:#f6f7f9; --panel:#ffffff; --ink:#1f2328; --ink-2:#5b6570; --ink-3:#8b949e;
+  --line:#e3e6ea; --accent:#3b5bdb; --accent-2:#eef1fd; --danger:#c0392b;
+}
+html[data-theme="green"]{
+  --bg:#e9f0e4; --panel:#f7fbf4; --ink:#22301f; --ink-2:#4d5f48; --ink-3:#84937e;
+  --line:#d3e0cb; --accent:#4b7f52; --accent-2:#e2efdb; --danger:#b4453a;
+}
+html[data-theme="blue"]{
+  --bg:#e8eff6; --panel:#f7fafd; --ink:#1e2a36; --ink-2:#4a5b6b; --ink-3:#8497a8;
+  --line:#d2dfeb; --accent:#3d6fa5; --accent-2:#e1ecf6; --danger:#b4453a;
+}
+html[data-theme="dark"]{
+  --bg:#16181d; --panel:#1e2127; --ink:#e6e8eb; --ink-2:#a5adb8; --ink-3:#6e7681;
+  --line:#2c3038; --accent:#7a90ff; --accent-2:#232a44; --danger:#e0685b;
+}
+
+/* ---- 3) 顶部：logo + 文字 在同一个可点击矩形内 ---- */
+.brand-box{display:flex;align-items:center;gap:8px;padding:5px 12px;border:1px solid var(--line);
+  border-radius:8px;background:var(--panel);color:var(--ink);cursor:pointer;flex:0 0 auto}
+.brand-box:hover{border-color:var(--accent);background:var(--accent-2)}
+.brand-box:active{transform:translateY(1px)}
+.brand-box .logo{width:20px;height:20px;flex:0 0 20px;color:var(--accent)}
+.brand-box .brand-text{font-weight:600;letter-spacing:.5px;white-space:nowrap}
+
+/* ---- 1) 格式工具栏 ---- */
+.fmtbar{display:flex;align-items:center;gap:6px;padding:6px 10px;flex-wrap:wrap;
+  border-bottom:1px solid var(--line);background:var(--panel)}
+.fmtbar select{width:auto;font-size:12px;padding:3px 6px}
+.fmtbar button{font-size:12px;padding:2px 8px}
+.fmt-check{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--ink-2);white-space:nowrap}
+.fmt-check input{width:auto}
+
+/* 标题标记的视觉提示（纯文本，导出 md 时即标准标题） */
+
+/* ---- 2) 主题选择条 ---- */
+.theme-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px}
+.theme-dot{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);padding:0;cursor:pointer}
+.theme-dot[data-theme="default"]{background:#f6f7f9}
+.theme-dot[data-theme="green"]{background:#dcead4}
+.theme-dot[data-theme="blue"]{background:#dbe8f4}
+.theme-dot[data-theme="dark"]{background:#1e2127}
+.theme-dot.active{border-color:var(--accent)}
+.theme-pick{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2)}
+.theme-pick input{width:34px;height:26px;padding:0;border:1px solid var(--line);background:none}
+
+/* ---- 6) 左侧拉动条：补充自动统计 ---- */
+.stat-rank{display:flex;flex-direction:column;gap:7px}
+.stat-rank .ri{font-size:11.5px;color:var(--ink-2);display:flex;justify-content:space-between;gap:6px}
+.stat-rank .bar{height:6px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:3px}
+.stat-rank .bar i{display:block;height:100%;background:var(--accent)}
+
+/* ---- 4) 右侧编辑区占 2/3 ---- */
+.library .catalog-wrap{flex:1 1 0}
+.library .preview{flex:2 1 0;width:auto;min-width:0}
+@media (max-width:960px){
+  .library .preview{display:none}
+}
+
+/* ================= Agent 对话框 ================= */
+.agent-dialog{width:min(1000px,95vw);max-height:86vh;overflow:auto}
+.agent-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:12px;margin-top:10px}
+.agent-col{min-width:0}
+.agent-log{border:1px solid var(--line);border-radius:8px;padding:10px;height:310px;overflow:auto;
+  font-size:12.5px;line-height:1.7;background:var(--panel)}
+.agent-step{padding:3px 0;color:var(--ink-2);border-bottom:1px dashed var(--line);word-break:break-word}
+.agent-step:last-child{border-bottom:none}
+.agent-step .ph{display:inline-block;min-width:56px;color:var(--ink-3);font-size:11px}
+.agent-step.ok{color:var(--ink)}
+.agent-step.bad{color:var(--danger)}
+.agent-draft{width:100%;height:310px;resize:vertical;font-size:14px;line-height:1.95;
+  font-family:"Songti SC",SimSun,Georgia,serif}
+@media (max-width:820px){ .agent-grid{grid-template-columns:1fr} }
+
+/* 二级菜单：章节标题默认只读，双击才可编辑 */
+.preview-title[readonly]{background:transparent;border-color:transparent;cursor:default}
+.preview-title[readonly]:hover{background:var(--accent-2);border-color:var(--line)}
+.preview-title:not([readonly]){background:var(--panel);border-color:var(--accent)}
+.preview-title[readonly]::selection{background:var(--accent-2)}
+
+/* ==================================================================
+   本次新增：语料库三栏 / 风格画像结构化 / Agent 无滚动条 / 窗口可拖动
+   ================================================================== */
+
+/* ---- 2) 语料库改为三栏：画像 | 检索+列表 | 详情 ---- */
+.corpus-body{display:flex;gap:1px;background:var(--line);overflow:hidden}
+.corpus-col{flex:1 1 0;min-width:0;background:var(--panel);padding:14px;overflow:auto}
+.corpus-detail{flex:1.15 1 0;min-width:0;background:var(--panel);padding:14px;
+  display:none;flex-direction:column;gap:8px}
+.corpus-body.has-detail .corpus-detail{display:flex}
+.corpus-title-input{font-weight:600;flex:0 0 auto}
+.corpus-text{flex:1 1 auto;min-height:220px;resize:none;font-size:13px;line-height:1.85;
+  font-family:"Songti SC",SimSun,Georgia,serif}
+.corpus-list-item.active{background:var(--accent-2);color:var(--accent);font-weight:600}
+
+/* ---- 1) 风格画像：结构化排布 ---- */
+.style-metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.style-metric{background:var(--accent-2);border-radius:8px;padding:8px 10px}
+.style-metric b{display:block;font-size:16px;line-height:1.3}
+.style-metric span{font-size:11px;color:var(--ink-2)}
+.style-block{margin-bottom:12px}
+.style-block .lab{font-size:11.5px;color:var(--ink-3);margin-bottom:6px;letter-spacing:.3px}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{font-size:11.5px;padding:2px 8px;border-radius:999px;background:var(--accent-2);
+  color:var(--ink-2);white-space:nowrap;line-height:1.7}
+.chip b{color:var(--accent);font-weight:600;margin-left:4px}
+.style-empty{color:var(--ink-3);font-size:12.5px;line-height:1.9}
+.prompt-preview{margin-top:6px;border-top:1px dashed var(--line);padding-top:8px}
+.prompt-preview summary{cursor:pointer;font-size:12px;color:var(--ink-3);outline:none}
+.prompt-preview pre{white-space:pre-wrap;font-size:11.5px;line-height:1.75;color:var(--ink-3);
+  margin:8px 0 0;font-family:inherit;max-height:220px;overflow:auto}
+
+/* ---- 3) Agent 对话框：自身不滚动，内部区域各自滚动 ---- */
+.agent-dialog{display:flex;flex-direction:column;gap:6px;max-height:88vh;overflow:hidden}
+.agent-grid{flex:1 1 auto;min-height:0;display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:12px;margin-top:8px}
+.agent-col{display:flex;flex-direction:column;min-height:0}
+.agent-log{flex:1 1 auto;min-height:140px;max-height:none;overflow:auto}
+.agent-draft{flex:1 1 auto;min-height:140px;height:auto;resize:none}
+@media (max-width:820px){ .agent-grid{grid-template-columns:1fr} }
+
+/* ---- 4) 所有次级菜单可拖动 ---- */
+dialog h3{cursor:move;user-select:none}
+dialog.dragging{opacity:.96}
+dialog.dragging h3{cursor:grabbing}
+
+/* 语料库窄屏：详情面板换行 */
+@media (max-width:1100px){
+  .corpus-body{flex-wrap:wrap}
+  .corpus-col{flex:1 1 46%}
+  .corpus-detail{flex:1 1 100%}
+}
+
+/* ==================================================================
+   滚动条统一美化：默认细窄圆角、半透明，悬停加深；可一键隐藏
+   ================================================================== */
+
+:root{
+  --sb: rgba(0, 0, 0, .16);
+  --sb-hover: rgba(0, 0, 0, .34);
+}
+@media (prefers-color-scheme: dark){
+  :root{ --sb: rgba(255, 255, 255, .16); --sb-hover: rgba(255, 255, 255, .34); }
+}
+html[data-theme="dark"]{ --sb: rgba(255, 255, 255, .16); --sb-hover: rgba(255, 255, 255, .34); }
+html[data-theme="default"],
+html[data-theme="green"],
+html[data-theme="blue"]{ --sb: rgba(0, 0, 0, .16); --sb-hover: rgba(0, 0, 0, .34); }
+
+/* Firefox / 标准 */
+*{
+  scrollbar-width: thin;
+  scrollbar-color: var(--sb) transparent;
+}
+*:hover{ scrollbar-color: var(--sb-hover) transparent; }
+
+/* WebKit：8px 轨道 + 4px 圆角滑块 */
+::-webkit-scrollbar{ width: 8px; height: 8px; }
+::-webkit-scrollbar-track{ background: transparent; border: none; }
+::-webkit-scrollbar-thumb{
+  background: var(--sb);
+  border-radius: 999px;
+  border: 2px solid transparent;   /* 让可见部分更细 */
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover{ background: var(--sb-hover); background-clip: padding-box; }
+::-webkit-scrollbar-corner{ background: transparent; }
+::-webkit-scrollbar-button{ display: none; height: 0; width: 0; }
+
+/* 彻底隐藏（保留滚动能力） */
+html.hide-sb *,
+html.hide-sb{ scrollbar-width: none; -ms-overflow-style: none; }
+html.hide-sb ::-webkit-scrollbar,
+html.hide-sb::-webkit-scrollbar{ width: 0; height: 0; display: none; }
+
+/* ==================================================================
+   语料库布局：左侧加宽 / 右侧详情常驻并吃满剩余空间
+   ================================================================== */
+.corpus{display:flex;flex-direction:column;min-height:0}
+.corpus-body{display:flex;flex:1 1 auto;min-height:0;gap:1px;background:var(--line);overflow:hidden}
+
+/* 左：风格画像 —— 加宽 */
+.corpus-body .style-col{flex:1.35 1 0;min-width:280px}
+/* 中：检索 + 语料列表 */
+.corpus-body .list-col{flex:0.85 1 0;min-width:220px}
+/* 右：详情 —— 常驻显示，吃掉所有剩余宽度 */
+.corpus-detail{flex:1.9 1 0;min-width:300px;display:flex;flex-direction:column;gap:8px}
+.corpus-body.has-detail .corpus-detail{display:flex}
+.corpus-detail .corpus-text{flex:1 1 auto;min-height:0}
+
+/* 风格画像在更宽的列里改成 3 列指标，更透气 */
+.style-col .style-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (min-width:1500px){
+  .style-col .style-metrics{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+
+/* 窄屏才退化成上下排列 */
+@media (max-width:1180px){
+  .corpus-body{flex-wrap:wrap;overflow:auto}
+  .corpus-body .style-col{flex:1 1 46%}
+  .corpus-body .list-col{flex:1 1 46%}
+  .corpus-detail{flex:1 1 100%;min-width:0;min-height:340px}
+}
+
+/* 语料库视图容器（此前误用了 .layout 的三栏网格，导致被挤成 230px 窄条） */
+.corpus-view{
+  flex:1 1 auto;
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+  min-height:0;
+  overflow:hidden;
+  background:var(--panel);
+}
+
+/* ==================================================================
+   Agent 对话框：加宽加高、保证整体露出，不再裁切
+   （此前 overflow:hidden + 固定高度 导致按钮被裁掉，且开了隐藏滚动条后无法触达）
+   ================================================================== */
+
+/* 外层 <dialog> 本身要够宽（默认 680px 会限制内部） */
+dialog#agentDialog{
+  width:min(1180px, 96vw);
+  max-width:96vw;
+  max-height:92vh;
+  padding:0;
+}
+
+/* 内层：撑满高度，把剩余空间给日志/草稿 */
+.agent-dialog{
+  width:100%;
+  height:min(90vh, 880px);
+  max-height:92vh;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  overflow:hidden;
+}
+.agent-dialog h3{margin:0 0 2px}
+.agent-dialog .hint{margin:0}
+
+.agent-grid{
+  flex:1 1 auto;
+  min-height:0;
+  display:grid;
+  grid-template-columns:minmax(0, 1fr) minmax(0, 1.15fr);
+  gap:12px;
+  margin-top:8px;
+}
+.agent-col{display:flex;flex-direction:column;min-height:0}
+.agent-log{flex:1 1 auto;min-height:0;max-height:none;overflow:auto}
+.agent-draft{flex:1 1 auto;min-height:0;height:auto;resize:none}
+
+/* 操作行：按钮固定靠左、不换行，状态文字用省略号不挤按钮 */
+.agent-actions{flex-wrap:nowrap;margin:6px 0 0}
+.agent-actions button{flex:0 0 auto}
+.agent-state{
+  flex:0 1 auto;min-width:0;text-align:right;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+
+/* 屏幕太矮时退化为可滚动 —— 宁可出现细滚动条，也不能让内容够不着 */
+@media (max-height:720px){
+  dialog#agentDialog{max-height:94vh}
+  .agent-dialog{height:auto;max-height:94vh;overflow:auto}
+  .agent-log{min-height:120px}
+  .agent-draft{min-height:120px}
+}
+
+@media (max-width:860px){
+  .agent-grid{grid-template-columns:1fr}
+  .agent-log{min-height:130px}
+  .agent-draft{min-height:130px}
+}
+
+/* ==================================================================
+   可滚动提示：不靠滚动条也能看出"下面还有内容"
+   当容器底部还有内容时，底边出现内阴影；滚下去之后顶边出现
+   ================================================================== */
+.sd-more{
+  box-shadow: inset 0 -18px 14px -14px rgba(0,0,0,.30);
+}
+.sd-up{
+  box-shadow: inset 0 18px 14px -14px rgba(0,0,0,.30);
+}
+.sd-up.sd-more{
+  box-shadow: inset 0 18px 14px -14px rgba(0,0,0,.30),
+              inset 0 -18px 14px -14px rgba(0,0,0,.30);
+}
+html[data-theme="dark"] .sd-more,
+html[data-theme="dark"] .sd-up,
+html[data-theme="dark"] .sd-up.sd-more{
+  box-shadow: inset 0 -18px 14px -14px rgba(255,255,255,.22);
+}
+html[data-theme="dark"] .sd-up{
+  box-shadow: inset 0 18px 14px -14px rgba(255,255,255,.22);
+}
+html[data-theme="dark"] .sd-up.sd-more{
+  box-shadow: inset 0 18px 14px -14px rgba(255,255,255,.22),
+              inset 0 -18px 14px -14px rgba(255,255,255,.22);
+}
+
+/* 底部居中的小箭头提示（只在有内容可滚时出现） */
+.sd-cue{position:relative}
+.sd-cue::after{
+  content:"";
+  position:absolute;left:50%;bottom:4px;width:9px;height:9px;
+  border-right:2px solid var(--ink-3);border-bottom:2px solid var(--ink-3);
+  transform:translateX(-50%) rotate(45deg);
+  opacity:0;transition:opacity .18s;pointer-events:none;
+}
+.sd-cue.sd-more::after{opacity:.7}
+.sd-cue.sd-more.sd-end::after{opacity:0}
+
+/* Agent 执行过程标题行 + 复制按钮 */
+.panel-h-row{display:flex;align-items:center;gap:8px}
+.panel-h-row .spacer{flex:1}
+.panel-h-row button{flex:0 0 auto}
+
+/* 缩进字符数输入框 */
+.indent-num{width:52px;font-size:12px;padding:3px 4px;text-align:center;flex:0 0 auto}
+
+/* ================= 查找替换 ================= */
+.findbar{display:flex;align-items:center;gap:6px;padding:6px 10px;flex-wrap:wrap;
+  border-bottom:1px solid var(--line);background:var(--accent-2)}
+.find-input{width:150px;font-size:12px;padding:3px 8px}
+.findbar select{width:auto;font-size:12px;padding:3px 6px}
+.find-count{font-size:11.5px;color:var(--ink-3);white-space:nowrap;min-width:64px}
+
+/* ================= Agent 大纲梳理 ================= */
+.outline-dialog{display:flex;flex-direction:column;gap:6px;width:100%;max-height:90vh;overflow:hidden}
+dialog#outlineDialog{width:min(1180px,96vw);max-width:96vw;max-height:92vh;padding:0}
+.outline-grid{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:12px;margin-top:8px}
+.outline-col{display:flex;flex-direction:column;min-height:0}
+.outline-result{flex:1 1 auto;min-height:0;overflow:auto;border:1px solid var(--line);
+  border-radius:8px;padding:12px;font-size:13px;line-height:1.8}
+.ov-block{margin-bottom:16px}
+.ov-block:last-child{margin-bottom:0}
+.ov-block .lab{font-size:11.5px;color:var(--ink-3);font-weight:600;margin-bottom:6px;letter-spacing:.4px}
+.ov-text{white-space:pre-wrap;color:var(--ink-2)}
+.ov-list{margin:0;padding-left:20px;color:var(--ink-2)}
+.ov-list li{margin-bottom:4px}
+.ov-dir{border-left:2px solid var(--accent);padding-left:10px;margin-bottom:10px}
+.ov-dir b{font-size:13px}
+.ov-dir p{margin:3px 0 0;color:var(--ink-2);font-size:12.5px}
+.ov-outline{border:1px solid var(--line);border-radius:6px;padding:10px;margin-bottom:8px;background:var(--accent-2)}
+.ov-outline b{font-size:13px}
+.ov-outline pre{margin:6px 0 0;white-space:pre-wrap;font-family:inherit;font-size:12.5px;color:var(--ink-2)}
+@media (max-width:860px){ .outline-grid{grid-template-columns:1fr} }
+
+/* ================= 悬停提示（伏笔思路） ================= */
+.hovertip{position:fixed;z-index:9999;max-width:340px;padding:10px 12px;border-radius:8px;
+  background:var(--panel);border:1px solid var(--line);color:var(--ink-2);
+  font-size:12.5px;line-height:1.75;white-space:pre-wrap;pointer-events:none;
+  box-shadow:none}
+.hovertip b{color:var(--ink);display:block;margin-bottom:4px;font-size:12px}
+
+/* 伏笔标记 */
+.list li .fs-mark{color:var(--accent);font-size:11px;flex:0 0 auto}
+
+/* 大纲梳理：范围行 */
+.outline-dialog .field.inline{min-width:120px}
+
+/* 大纲偏差提示块 */
+.ov-warn{border-left:3px solid var(--danger);background:rgba(192,57,43,.07);
+  border-radius:6px;padding:10px 12px;margin-bottom:16px}
+.ov-advice{display:inline-block;margin-left:8px;font-size:11.5px;color:var(--accent);
+  background:var(--accent-2);padding:1px 7px;border-radius:99px}
+
+/* ==================================================================
+   悬停提示：单行显示（中间缩略），突出「思路/内容」
+   ================================================================== */
+.hovertip{
+  max-width:min(600px, 88vw);
+  white-space:nowrap;              /* 只显示一行 */
+  display:flex; align-items:baseline; gap:8px;
+  padding:8px 12px; line-height:1.5;
+}
+.tip-title{flex:0 0 auto; color:var(--ink-3); font-size:11.5px}
+.tip-body{
+  min-width:0; overflow:hidden; text-overflow:ellipsis;
+  color:var(--accent); font-weight:600; font-size:12.5px;   /* 突出思路/内容 */
+}
+
+/* 查找按钮的开启态 */
+#navFind.on{background:var(--accent-2); border-color:var(--accent); color:var(--accent)}
+
+/* ==================================================================
+   伏笔标注视图
+   说明：<textarea> 无法给单个段落加样式，因此提供"标注视图"——
+        段落渲染为可标注元素，匹配到的加虚线、可点击
+   ================================================================== */
+.content-annotated{
+  flex:1 1 auto; min-height:0; overflow:auto; padding:16px 20px;
+  line-height:2; font-family:"Songti SC",SimSun,Georgia,serif; background:transparent;
+}
+.anno-p{margin:0; white-space:pre-wrap; word-break:break-word; min-height:1.9em}
+.anno-p.anno-fs{
+  border-bottom:1px dashed var(--accent);      /* 伏笔文段底部的虚线标注 */
+  cursor:pointer;
+}
+.anno-p.anno-fs:hover{background:var(--accent-2)}
+.anno-tip{
+  margin:4px 0 12px; padding:10px 12px; border-radius:8px;
+  background:var(--accent-2); border-left:3px solid var(--accent);
+  color:var(--ink-2); font-size:13px; line-height:1.8; white-space:pre-wrap;
+}
+.anno-tip b{display:block;color:var(--accent);font-size:12px;margin-bottom:4px}
+.anno-empty{color:var(--ink-3);font-size:13px;padding:20px 0}
+#toggleAnnotate.on{background:var(--accent-2);border-color:var(--accent);color:var(--accent)}
+
+/* ==================================================================
+   伏笔标注（画在正常编辑界面里）
+   原理：在 textarea 正下方放一层"镜像"，文字透明、只画虚线；
+        镜像的字体/行高/内边距在运行时从 textarea 的 computedStyle 复制，
+        保证与正文逐像素对齐。
+   ================================================================== */
+.editor-wrap{
+  position:relative;
+  flex:1 1 auto;
+  display:flex;
+  min-height:0;
+  min-width:0;
+}
+.editor-wrap #content{
+  position:relative;
+  z-index:1;
+  background:transparent;
+  border:none;
+}
+.content-marks{
+  position:absolute;
+  inset:0;
+  z-index:0;
+  pointer-events:none;          /* 不挡输入 */
+  overflow:hidden;
+  padding:16px 20px;            /* 运行时会按 textarea 实测值覆盖 */
+  white-space:pre-wrap;
+  overflow-wrap:break-word;
+  word-break:break-word;
+  color:transparent;            /* 只露出虚线 */
+  background:transparent;
+}
+/* 虚线只画在正文文字上（不要盖住首行那两格缩进）。
+   装饰放在内层 span 上，div 本身不画。 */
+.content-marks .mk-para .mk-u{
+  /* 要"贴"在文字底部：text-decoration 画在字形基线下，
+     border-bottom 会画在行盒底部，line-height:2 时离字一大截。 */
+  text-decoration:underline dashed var(--accent);
+  text-decoration-thickness:2px;
+  text-underline-offset:4px;
+  text-decoration-skip-ink:none;
+}
+
+/* 悬停/点击浮窗最终排版：文段缩略让位，伏笔思路为主体 */
+.hovertip{max-width:min(640px,90vw); white-space:nowrap; display:flex; align-items:baseline; gap:8px}
+.hovertip .tip-title{
+  flex:0 1 auto; max-width:42%; min-width:0;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  color:var(--ink-3); font-size:11.5px;
+}
+.hovertip .tip-body{
+  flex:1 1 auto; min-width:0;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  color:var(--accent); font-weight:600; font-size:13px;
+}
+
+/* 导入对话框：外层 <dialog> 被全局限制在 min(680px,92vw)，
+   内层若再写死 720px 就比外层宽 40px → 必然横向滚动。改成内外同宽。 */
+dialog#importDialog{width:min(760px,94vw);max-width:94vw;padding:0}
+.import-dialog{width:100%}
+.import-dialog textarea{font-family:"Songti SC",SimSun,Georgia,serif;line-height:1.8;resize:vertical}

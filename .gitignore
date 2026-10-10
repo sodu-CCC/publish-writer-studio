@@ -1,0 +1,43 @@
+# ---- 本地运行产物 ----
+server-url.txt
+*.log
+logs/
+
+# ---- 测试与开发数据 ----
+_testdata/
+backups/
+*-backups/
+
+# ---- 操作系统 ----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- 编辑器 ----
+.vscode/
+.idea/
+*.swp
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+
+# ---- Node（仅开发期工具，运行时零依赖）----
+node_modules/
+dist/
+test-results/
+playwright-report/
+blob-report/
+.playwright/
+# 注意：package-lock.json 应当提交，以保证依赖可复现
+
+# ============================================================
+# ⚠️ 安全护栏：以下内容一律不得进入版本控制
+# 解包/逆向产物属于他人受版权保护的软件与信息，公开即为侵权
+# ============================================================
+authorwrite-analysis/
+*analysis*/
+*.asar
+*.asar.unpacked/
+*.node
+*.pdb

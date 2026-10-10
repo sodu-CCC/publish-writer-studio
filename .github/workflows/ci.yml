@@ -1,0 +1,125 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # ══════════════════════════════════════════════════════════
+  # 1) 静态自检（不需要装依赖，秒级完成）
+  # ══════════════════════════════════════════════════════════
+  check:
+    name: 静态自检
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 运行项目自检
+        run: node tools/check.mjs
+
+  # ══════════════════════════════════════════════════════════
+  # 2) ESLint 代码风格检查
+  # ══════════════════════════════════════════════════════════
+  lint:
+    name: 代码风格
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # 首次提交若还没有 package-lock.json，用 install；
+      # 生成 lockfile 后可改为 `npm ci`（更快、更可复现）
+      - name: 安装开发依赖
+        run: npm install --no-audit --no-fund
+
+      - name: ESLint
+        run: npx eslint .
+
+  # ══════════════════════════════════════════════════════════
+  # 3) Playwright 端到端测试（真实 Chromium 加载扩展）
+  # ══════════════════════════════════════════════════════════
+  e2e:
+    name: 端到端测试
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # e2e 会通过 playwright.config.js 的 webServer 启动 `python serve.py`
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 安装开发依赖
+        run: npm install --no-audit --no-fund
+
+      - name: 安装 Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: 运行 E2E
+        run: npx playwright test
+
+      - name: 失败时上传报告与截图
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
+  # ══════════════════════════════════════════════════════════
+  # 4) 打包扩展（所有检查通过后才执行）
+  # ══════════════════════════════════════════════════════════
+  package:
+    name: 打包扩展
+    needs: [ check, lint, e2e ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 生成扩展 ZIP（只含运行时文件）
+        run: |
+          mkdir -p dist
+          zip -r dist/writer-studio-extension.zip . \
+            -x '.git/*' '.github/*' 'tools/*' 'tests/*' 'dist/*' \
+               'node_modules/*' '*.md' 'LICENSE' '*.json.bak' \
+               '*.bat' '*.ps1' 'serve.py' 'eslint.config.js' 'playwright.config.js' 'package.json' 'package-lock.json'
+          echo "--- 包内文件 ---"
+          unzip -l dist/writer-studio-extension.zip
+
+      - name: 校验包内 manifest 合法
+        run: |
+          unzip -p dist/writer-studio-extension.zip manifest.json > /tmp/m.json
+          python -c "import json;m=json.load(open('/tmp/m.json'));assert m['manifest_version']==3;print('manifest OK:',m['name'],m['version'])"
+
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: writer-studio-extension
+          path: dist/writer-studio-extension.zip
+          retention-days: 30
+

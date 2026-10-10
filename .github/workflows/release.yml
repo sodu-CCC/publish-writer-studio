@@ -1,0 +1,54 @@
+name: Release
+
+# 打 tag 时触发，例如：git tag v1.0.0 && git push origin v1.0.0
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write        # 创建 Release 需要写权限
+
+jobs:
+  release:
+    name: 发布版本
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 安装 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 发布前自检
+        run: node tools/check.mjs
+
+      - name: 校验 tag 与 manifest 版本号一致
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          VER=$(python -c "import json;print(json.load(open('manifest.json'))['version'])")
+          echo "tag=$TAG  manifest=$VER"
+          if [ "$TAG" != "$VER" ]; then
+            echo "::error::tag 版本($TAG) 与 manifest 版本($VER) 不一致"
+            exit 1
+          fi
+
+      - name: 打包扩展
+        run: |
+          mkdir -p dist
+          zip -r "dist/writer-studio-${GITHUB_REF_NAME}.zip" . \
+            -x '.git/*' '.github/*' 'tools/*' 'dist/*' '*.md' 'LICENSE' '*.bat' '*.ps1' 'serve.py'
+
+      - name: 创建 GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.zip
+          generate_release_notes: true     # 自动根据提交生成 release notes
