@@ -388,9 +388,14 @@ test.describe('Writer Studio 冒烟测试', () => {
     await page.locator('#cardBody').fill('在三章之后回收');
     await expect(page.locator('#cardAnchor')).toHaveValue('');
 
-    let warned = '';
-    page.once('dialog', (d) => { warned = d.message(); d.accept(); });
+    // 提醒是"异步"弹出来的：保存要先写库、再重载卡片，然后才 alert。
+    // 所以必须"等它出现"再断言 —— 点完立刻断言会在慢机器（CI）上抢跑，
+    // warned 还是空串，造成"本地全过、CI 必挂"的假失败。
+    const dlgPromise = page.waitForEvent('dialog', { timeout: 10_000 });
     await page.locator('#cardSave').click();
+    const dlg = await dlgPromise;
+    const warned = dlg.message();
+    await dlg.accept();
     await expect(page.locator('#cardDialog')).toBeHidden();
     expect(warned).toContain('伏笔文段');
 
