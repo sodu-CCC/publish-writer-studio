@@ -78,16 +78,34 @@ jobs:
       - name: 安装开发依赖
         run: npm install --no-audit --no-fund
 
-      # Linux 运行器默认没有中文字体：不装的话中文可能渲染成方框，
-      # 既影响鼠标拖选类用例，失败时的截图也看不清内容。
-      - name: 安装中文字体
-        run: sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+      # Linux 运行器默认没有中文字体：不装的话中文会渲染成方框，失败截图也看不清。
+      - name: 安装中文字体（可选：只影响失败截图的可读性）
+        continue-on-error: true          # 装不上也不许拖垮 CI
+        run: |
+          sudo apt-get update -qq || true
+          sudo apt-get install -y --no-install-recommends fonts-noto-cjk || true
 
       - name: 安装 Chromium
         run: npx playwright install --with-deps chromium
 
       - name: 运行 E2E
-        run: npx playwright test
+        run: |
+          set +e
+          npx playwright test > /tmp/e2e.log 2>&1
+          code=$?
+          tail -n 60 /tmp/e2e.log
+          # 把失败详情写进 Job Summary —— 该页面公网可读，
+          # 别人（和维护者）不用登录也能看到到底是哪个用例挂了。
+          if [ "$code" -ne 0 ]; then
+            {
+              echo "## ❌ E2E 失败（exit $code）"
+              echo ""
+              echo '```text'
+              tail -n 150 /tmp/e2e.log
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+          exit "$code"
 
       - name: 失败时上传报告与截图
         if: failure()
