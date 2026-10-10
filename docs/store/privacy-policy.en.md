@@ -72,7 +72,7 @@ The extension then sends the following over HTTPS **directly to the model provid
 ## 5. Permissions and why they exist
 
 Every permission this extension requests exists purely to deliver the features described above; each one is justified in
-[Permission justifications](permission-justifications.md). The guiding principle is **least privilege**, and there is no permission that would let us read page content.
+The extension's permission list, item by item (see the store listing's permission notes). The guiding principle is **least privilege**, and there is no permission that would let us read page content.
 
 ---
 

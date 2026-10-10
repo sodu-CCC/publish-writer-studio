@@ -9,7 +9,7 @@
 
 > 内含：功能详解 · 操作说明 · 数据存储与隐私 · 常见问题 · **免责声明**
 
-🏪 **要上架浏览器商店？** 上架材料包在 [`docs/store/`](docs/store/README.md) —— 含商店文案（中/英）、隐私政策（中/英）、权限用途说明、以及 5 张 1280×800 截图。
+🔒 **隐私政策**：[中文](docs/store/privacy-policy.zh-CN.md) ｜ [English](docs/store/privacy-policy.en.md)
 
 以 Chrome 扩展（Manifest V3）形式交付，也可以作为纯网页在本地运行。
 
@@ -224,11 +224,10 @@ E2E 测试用真实浏览器打开工作台，**共 36 个用例**，并断言**
 ├─ icons/          图标（16 / 48 / 128）
 ├─ docs/           产品文档（中文 / English，含免责声明）
 ├─ tools/check.mjs        项目自检脚本（本地与 CI 共用）
-├─ tools/set-repo-info.ps1 一次性把文档里的占位符替换成你的仓库信息
 ├─ tests/          Playwright E2E 测试
 ├─ .github/        CI / Release 工作流
 ├─ serve.py        本地服务器（仅网页版需要，含 AI 反向代理）
-└─ start-server.bat / backup.bat / 设置仓库信息.bat   Windows 便捷脚本
+└─ start-server.bat / backup.bat   Windows 便捷脚本
 ```
 ## 📄 许可
 
