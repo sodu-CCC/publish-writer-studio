@@ -1,6 +1,9 @@
 # 商店上架材料包 · Store Submission Kit
 
 > 「商店版本的产品文档」= **上架表单要填的东西**，不是 README。
+
+> 🚀 **决定只走 Edge + GitHub（不花 $5）？** 直接看 → [`EDGE-AND-GITHUB.md`](EDGE-AND-GITHUB.md)
+> 那是逐步操作手册：占位符替换 → 推 GitHub → 打 tag 出包 → Edge 后台逐字段填表 → 发新版。
 > 这份清单把材料、流程、风险点一次说清。
 
 ---
@@ -19,6 +22,7 @@
 | **隐私政策** | ✅ 已写好（中/英） | `privacy-policy.zh-CN.md` / `privacy-policy.en.md` |
 | 隐私政策 **网址** | ⚠️ 需要你生成（见第三节） | — |
 | 支持邮箱 / 主页 | ⚠️ 填你自己的 | — |
+| **Edge 商店 Logo 300×300** | ✅ 已生成 | `docs/store/edge-store-logo-300.png` |
 | 宣传图 440×280（可选，但能显著提升点击率） | ⚠️ 可选 | — |
 
 ### 已有的 5 张截图

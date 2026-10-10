@@ -41,11 +41,15 @@ jobs:
             exit 1
           fi
 
-      - name: 打包扩展
+      - name: 打包扩展（白名单：只含运行时文件）
+        # 这个 zip 同时用于两件事：提交 Edge 商店 / 供用户「加载已解压的扩展程序」。
+        # 因此只放运行时必需的文件，manifest.json 必须位于 zip 根目录。
         run: |
           mkdir -p dist
-          zip -r "dist/writer-studio-${GITHUB_REF_NAME}.zip" . \
-            -x '.git/*' '.github/*' 'tools/*' 'dist/*' '*.md' 'LICENSE' '*.bat' '*.ps1' 'serve.py'
+          zip -r "dist/writer-studio-${GITHUB_REF_NAME}.zip" \
+            manifest.json background.js app popup icons
+          echo "---- 包内文件 ----"
+          unzip -l "dist/writer-studio-${GITHUB_REF_NAME}.zip"
 
       - name: 创建 GitHub Release
         uses: softprops/action-gh-release@v2
