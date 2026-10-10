@@ -1406,13 +1406,19 @@ function insertHead(level) {
 /* ---------- 5) 所有弹窗：点外面就关闭（回到前置页面） ---------- */
 
 /* 整个浏览器窗口不在最前面时，第一次点击只是"把窗口激活"，
-   不应该顺手把弹窗也关掉 —— 否则从别的程序切回来，点一下就丢掉了当前菜单。 */
-let windowRegainedFocusAt = 0;
-window.addEventListener("focus", () => { windowRegainedFocusAt = Date.now(); });
+   不应该顺手把弹窗也关掉 —— 否则从别的程序切回来，点一下就丢掉了当前菜单。
 
-/** 这次点击是不是"用来把窗口唤醒"的那一下 */
+   判定方式：监听 blur 记一个标记，"回到前台后的第一次点击"直接吞掉并清标记。
+   不用"距 focus 多少毫秒"这种时间窗口 —— 那在不同机器 / CI 上会时灵时不灵。
+   只认 blur，也天然避开了"页面刚打开时的 focus 事件"被误伤。 */
+let windowWasBlurred = false;
+window.addEventListener("blur", () => { windowWasBlurred = true; });
+
+/** 这次点击是不是"用来把窗口唤醒"的那一下（最多只会命中一次） */
 function justActivatedWindow() {
-  return Date.now() - windowRegainedFocusAt < 500;
+  if (!windowWasBlurred) return false;
+  windowWasBlurred = false;
+  return true;
 }
 
 function enableDialogBackdropClose() {

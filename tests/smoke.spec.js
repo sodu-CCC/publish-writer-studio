@@ -626,13 +626,12 @@ test.describe('Writer Studio 冒烟测试', () => {
     const cx = box.x > 20 ? box.x - 10 : 2;
     const cy = box.y > 20 ? box.y - 10 : 2;
 
-    // 模拟「浏览器窗口刚被激活」那一瞬间
-    await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+    // 模拟「窗口先切到后台、再回到前台」
+    await page.evaluate(() => window.dispatchEvent(new Event('blur')));
     await page.mouse.click(cx, cy);
-    await expect(page.locator('#agentDialog')).toBeVisible();   // 不该被顺手关掉
+    await expect(page.locator('#agentDialog')).toBeVisible();   // 回前台的第一下：不该被顺手关掉
 
-    // 过了保护窗口后，正常点黑暗处应该能关
-    await page.waitForTimeout(600);
+    // 第二下就属于正常操作，应该能关（不再依赖等待时间）
     await page.mouse.click(cx, cy);
     await expect(page.locator('#agentDialog')).toBeHidden();
     expectNoErrors(errors);

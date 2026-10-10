@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "码字工坊 · Writer Studio",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "本地优先的网文创作工作台：作品/章节管理、字数统计、快照历史，可选外部 AI 辅助（自带密钥）。",
   "minimum_chrome_version": "114",
   "action": {
