@@ -41,9 +41,9 @@
 
 ### 1. 把占位符换成真实信息
 
-需要替换的 `<你的用户名>` / `<你的邮箱>`，会出现在：
+需要替换的 `sodu-CCC` / `zhangxing0323@gmail.com`，会出现在：
 
-- `README.md`（CI 徽章两处 `OWNER`）
+- `README.md`（CI 徽章两处 `sodu-CCC`）
 - `docs/store/listing.zh-CN.md` / `listing.en.md`（主页、支持邮箱、隐私政策网址）
 - `docs/store/privacy-policy.zh-CN.md` / `.en.md`（Issue 链接）
 
@@ -53,7 +53,7 @@
 cd /d E:\CodexWork\publish-writer-studio
 ```
 
-然后用编辑器全局替换 `OWNER` → 你的 GitHub 用户名，`<你的用户名>` → 同上，`<你的邮箱>` → 你的邮箱。
+然后用编辑器全局替换 `sodu-CCC` → 你的 GitHub 用户名，`sodu-CCC` → 同上，`zhangxing0323@gmail.com` → 你的邮箱。
 
 ### 2. 把代码推上 GitHub
 
@@ -67,10 +67,10 @@ cd /d E:\CodexWork\publish-writer-studio
 
 1. 仓库 → Settings → Pages
 2. Source 选 `Deploy from a branch`，Branch 选 `main` / `root`，保存
-3. 等 1 分钟，得到 `https://<用户名>.github.io/writer-studio/`
+3. 等 1 分钟，得到 `https://sodu-CCC.github.io/writer-studio/`
 4. 隐私政策网址就是：
-   - 中文：`https://<用户名>.github.io/writer-studio/docs/store/privacy-policy.zh-CN.html`
-   - 英文：`https://<用户名>.github.io/writer-studio/docs/store/privacy-policy.en.html`
+   - 中文：`https://sodu-CCC.github.io/writer-studio/docs/store/privacy-policy.zh-CN.html`
+   - 英文：`https://sodu-CCC.github.io/writer-studio/docs/store/privacy-policy.en.html`
 
 > ⚠️ GitHub Pages 对 `.md` 会当纯文本处理，链接打开是源码。
 > 两个办法：① 把 `.md` 复制一份为 `.html` 加个简单页面壳；② 直接用方案 B 的 GitHub 渲染页。
@@ -80,7 +80,7 @@ cd /d E:\CodexWork\publish-writer-studio
 直接用仓库里的文件，打开就是渲染好的 Markdown：
 
 ```
-https://github.com/<用户名>/writer-studio/blob/main/docs/store/privacy-policy.zh-CN.md
+https://github.com/sodu-CCC/writer-studio/blob/main/docs/store/privacy-policy.zh-CN.md
 ```
 
 > 商店审核**接受** GitHub 的文件页作为隐私政策网址（内容公开、可直接访问即可）。

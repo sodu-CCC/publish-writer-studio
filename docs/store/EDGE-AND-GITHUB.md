@@ -27,9 +27,9 @@
 
 | 占位符 | 出现在 |
 |---|---|
-| `OWNER` | `README.md`（CI 徽章，两处） |
-| `<你的用户名>` | `docs/store/listing.*.md`、`privacy-policy.*.md`、本文件 |
-| `<你的邮箱>` | `docs/store/listing.*.md` |
+| `sodu-CCC` | `README.md`（CI 徽章，两处） |
+| `sodu-CCC` | `docs/store/listing.*.md`、`privacy-policy.*.md`、本文件 |
+| `zhangxing0323@gmail.com` | `docs/store/listing.*.md` |
 
 在 `E:\CodexWork\publish-writer-studio` 目录下，把下面三个变量换成你的信息后执行：
 
@@ -41,7 +41,7 @@ Get-ChildItem $root -Recurse -File -Include *.md |
   Where-Object { $_.FullName -notmatch '\\node_modules\\' } |
   ForEach-Object {
     $t = [System.IO.File]::ReadAllText($_.FullName, [System.Text.Encoding]::UTF8)
-    $t = $t.Replace('OWNER', $user).Replace('<你的用户名>', $user).Replace('<your-username>', $user).Replace('<你的邮箱>', $mail).Replace('<your-email>', $mail)
+    $t = $t.Replace('sodu-CCC', $user).Replace('sodu-CCC', $user).Replace('sodu-CCC', $user).Replace('zhangxing0323@gmail.com', $mail).Replace('zhangxing0323@gmail.com', $mail)
     [System.IO.File]::WriteAllText($_.FullName, $t, (New-Object System.Text.UTF8Encoding($false)))
   }
 Write-Host "占位符替换完成"
@@ -64,7 +64,7 @@ Write-Host "占位符替换完成"
 cd /d E:\CodexWork\publish-writer-studio
 git add -A
 git commit -m "docs: 替换占位符为实际仓库信息"
-git remote add origin https://github.com/<你的用户名>/writer-studio.git
+git remote add origin https://github.com/sodu-CCC/writer-studio.git
 git push -u origin main
 ```
 
@@ -157,14 +157,14 @@ git push origin v0.1.0
 |---|---|---|
 | Category | `Productivity`（生产力） | — |
 | Support contact info | 你的邮箱 | — |
-| **Privacy policy URL** | `https://github.com/<用户名>/writer-studio/blob/main/docs/store/privacy-policy.zh-CN.md` | 见下方提示 |
-| Website URL | `https://github.com/<用户名>/writer-studio` | — |
+| **Privacy policy URL** | `https://github.com/sodu-CCC/writer-studio/blob/main/docs/store/privacy-policy.zh-CN.md` | 见下方提示 |
+| Website URL | `https://github.com/sodu-CCC/writer-studio` | — |
 | Mature content | `No` | — |
 
 > **隐私政策 URL 只要能被公开访问即可**，GitHub 的文件页就是公开可访问的 ✓
 > 前提：**仓库必须是 Public**（Private 仓库的链接审核员打不开，一定会被驳回）。
 > 想更正式，可开 GitHub Pages（Settings → Pages → main / root），地址形如
-> `https://<用户名>.github.io/writer-studio/`，内容同样用 `docs/store/privacy-policy.zh-CN.md`。
+> `https://sodu-CCC.github.io/writer-studio/`，内容同样用 `docs/store/privacy-policy.zh-CN.md`。
 
 ### 5.3 Store listing（商店展示）
 
